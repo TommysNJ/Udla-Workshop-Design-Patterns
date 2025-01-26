@@ -1,4 +1,6 @@
-﻿using DesignPatterns.Models;
+﻿using DesignPatterns.Factories;
+using DesignPatterns.ModelBuilders;
+using DesignPatterns.Models;
 using DesignPatterns.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -22,6 +24,22 @@ namespace DesignPatterns.Controllers
             _logger = logger;
         }
 
+        private CarFactory chooseFactory(string vehicle)
+        {
+            switch (vehicle)
+            {
+                case "Mustang":
+                    return new FordMustangFactory();
+                case "Explorer":
+                    return new FordExplorerFactory();
+                case "Escape":
+                    return new FordEscapeFactory();
+                default:
+                    throw new NotImplementedException();
+
+            }
+        }
+
         public IActionResult Index()
         {
             var model = new HomeViewModel();
@@ -32,17 +50,25 @@ namespace DesignPatterns.Controllers
             return View(model);
         }
 
+      
+
         [HttpGet]
         public IActionResult AddMustang()
         {
-            _vehicleRepository.AddVehicle(new Car("red","Ford","Mustang"));
+            var builder = new CarModelBuilder();
+
+            _vehicleRepository.AddVehicle(builder.Build());
             return Redirect("/");
         }
 
         [HttpGet]
         public IActionResult AddExplorer()
         {
-            _vehicleRepository.AddVehicle(new Car("red", "Ford", "Explorer"));
+            var builder = new CarModelBuilder();
+            _vehicleRepository.AddVehicle(builder
+                .setModel("Explorer")
+                .setColor("black")
+                .Build());
             return Redirect("/");
         }
 
